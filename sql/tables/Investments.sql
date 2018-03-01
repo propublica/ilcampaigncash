@@ -1,0 +1,21 @@
+CREATE UNLOGGED TABLE IF NOT EXISTS raw.investments (
+    id integer primary key,
+    committeeid integer,
+    fileddocid integer,
+    description character varying,
+    purchasedate date,
+    purchaseshares integer,
+    purchaseprice double precision,
+    currentvalue double precision,
+    liquidvalue double precision,
+    liquiddate date,
+    lastonlyname character varying,
+    firstname character varying,
+    address1 character varying,
+    address2 character varying,
+    city character varying,
+    state character varying,
+    zip character varying,
+    archived boolean,
+    country character varying
+);
