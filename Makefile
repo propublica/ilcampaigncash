@@ -15,14 +15,19 @@ TABLES = Candidates CanElections CmteCandidateLinks CmteOfficerLinks Committees 
 SUMMARY_PATH = /Users/DE-Admin/Code/il-campaign-widget/src/data
 
 
-.PHONY: all clean process load create_tables create_views download
+.PHONY: all download create_tables create_views process load_data
 
-all : db/init sql_init create_tables process load create_views sql_finalize
-download : $(patsubst %, data/%.txt, $(TABLES))
+all : create_db sql_init create_tables process load_data create_views sql_finalize
+download : $(patsubst %, data/download/%.txt, $(TABLES))
 create_tables : $(patsubst %, create_table_%, $(TABLES))
 create_views : $(patsubst %, create_view_%, $(TABLES)) create_view_Sunshine
 process : $(patsubst %, data/processed/%.csv, $(TABLES))
-load : $(patsubst %, db/%, $(TABLES))
+load_data : $(patsubst %, db/%, $(TABLES))
+
+
+define check_database
+ psql $(ILCAMPAIGNCASH_DB_URL) -c "select 1;" > /dev/null 2>&1 ||
+endef
 
 
 define check_raw_relation
@@ -35,23 +40,24 @@ define check_public_relation
 endef
 
 
-db/init	:
-	createdb $(ILCAMPAIGNCASH_DB_NAME)
-	touch $@
+create_db	:
+	$(check_database) psql $(ILCAMPAIGNCASH_DB_ROOT_URL) -c "create database $(ILCAMPAIGNCASH_DB_NAME);"
 
 
-db/drop : db/init
-	dropdb $(ILCAMPAIGNCASH_DB_NAME) || touch /dev/null
-	rm -f db/*
+drop_db : create_db
+	psql $(ILCAMPAIGNCASH_DB_ROOT_URL) -c "drop database $(ILCAMPAIGNCASH_DB_NAME);" && rm -f db/*
 
 
 data/download/%.txt :
 	aria2c -x5 -q -d data/download --ftp-user="$(ILCAMPAIGNCASH_FTP_USER)" --ftp-passwd="$(ILCAMPAIGNCASH_FTP_PASSWD)" ftp://ftp.elections.il.gov/CampDisclDataFiles/$*.txt
 
 
+data/processed/%.csv : data/download/%.txt
+	python processors/clean_isboe_tsv.py $< $* > $@
+
+
 db/% : data/processed/%.csv
-	psql $(ILCAMPAIGNCASH_DB_URL) -c "\copy raw.$* from '$(CURDIR)/$<' with delimiter ',' csv header;"
-	touch db/$*
+	psql $(ILCAMPAIGNCASH_DB_URL) -c "\copy raw.$* from '$(CURDIR)/$<' with delimiter ',' csv header;" && touch db/$*
 
 
 sql_% : sql/%.sql
@@ -66,10 +72,6 @@ create_view_% : sql/views/%.sql
 	$(check_public_relation) psql $(ILCAMPAIGNCASH_DB_URL) -f $<
 
 
-data/processed/%.csv : data/download/%.txt
-	python processors/clean_isboe_tsv.py $< $* > $@
-
-
-clean : db/drop
+clean : drop_db
 	rm -f data/processed/*
 	rm -f data/download/*
