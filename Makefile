@@ -13,7 +13,6 @@
 
 TABLES = Candidates CanElections CmteCandidateLinks CmteOfficerLinks Committees D2Totals Expenditures FiledDocs Investments Officers PrevOfficers Receipts
 
-
 .PHONY: all download create_tables create_views process load_data
 
 all : create_db sql_init create_tables process load_data create_views sql_finalize
@@ -39,7 +38,7 @@ define check_public_relation
 endef
 
 
-create_db	:
+create_db :
 	$(check_database) psql $(ILCAMPAIGNCASH_DB_ROOT_URL) -c "create database $(ILCAMPAIGNCASH_DB_NAME);"
 
 
