@@ -12,7 +12,6 @@
 ###############################################################################
 
 TABLES = Candidates CanElections CmteCandidateLinks CmteOfficerLinks Committees D2Totals Expenditures FiledDocs Investments Officers PrevOfficers Receipts
-SUMMARY_PATH = /Users/DE-Admin/Code/il-campaign-widget/src/data
 
 
 .PHONY: all download create_tables create_views process load_data
