@@ -34,7 +34,9 @@ export ILCAMPAIGNCASH_DB_URL=postgres://localhost:5432/ilcampaigncash
 
 Check out `Makefile` for all possible tasks.
 
-### Load
+### Load all
+
+Download, process, and load.
 
 ```
 make all
@@ -42,11 +44,15 @@ make all
 
 ### Clean
 
+Wipes database and files.
+
 ```
 make clean
 ```
 
 ### Download
+
+Download the latest data.
 
 ```
 make download
@@ -66,7 +72,7 @@ This incantation creates the database and then loads each table in four parallel
 
 This loader mimics the [Illinois Sunshine](https://illinoissunshine.org/) extract-transform-load process.
 
-It uses the efficient Postgres `COPY` command to load the raw data into a Postgres schema called `raw`. The raw tables are then transformed via materialized views into a `public` schema which substantially matches the Illinois Sunshine data model.
+It uses the efficient Postgres `COPY` command to load the raw data into a Postgres schema called `raw`. The raw tables are then cleaned and copied as materialized views into a `public` schema which substantially matches the Illinois Sunshine data model.
 
 The loader does NOT handle updates, though it could be adapted to. However, this is not recommended. Inserts are faster than updates and somewhat easier to parallelize, and static builds are cheaper and more reliable than dynamic sites. The data itself is only updated daily at the time of writing.
 
