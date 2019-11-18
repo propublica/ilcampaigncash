@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW candidates
+CREATE TABLE public.candidates
 AS
   SELECT
     id,
@@ -17,4 +17,4 @@ AS
     partyaffiliation as party,
     redactionrequested as redaction_requested
   FROM raw.candidates
-WITH DATA;
+;

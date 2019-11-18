@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW committees
+CREATE TABLE public.committees
 AS
   SELECT
     id as id,
@@ -29,5 +29,4 @@ AS
     partyaffiliation as party,
     purpose as purpose
   FROM raw.committees
-WITH DATA;
-
+;

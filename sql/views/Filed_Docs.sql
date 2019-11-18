@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW filed_docs
+CREATE TABLE public.filed_docs
 AS
   SELECT
     id as id,
@@ -31,5 +31,5 @@ AS
     clarification as clarification,
     redactionrequested as redaction_requested
   FROM raw.fileddocs
-WITH DATA;
+;
 

@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW expenditures
+CREATE TABLE public.expenditures
 AS
   SELECT
     id as id,
@@ -25,6 +25,6 @@ AS
     country as country,
     redactionrequested as redaction_requested
   FROM raw.expenditures
-WITH DATA;
+;
 
 

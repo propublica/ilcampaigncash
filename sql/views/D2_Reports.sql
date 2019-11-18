@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW d2_reports
+CREATE TABLE public.d2_reports
 AS
   SELECT
     id as id,
@@ -33,5 +33,5 @@ AS
     endfundsavail as end_funds_available,
     archived as archived
   FROM raw.d2totals
-WITH DATA;
+;
 
