@@ -2,12 +2,17 @@
 #
 # ILLINOIS STATE BOARD OF ELECTION CAMPAIGN FINANCE LOADER
 #
-# You must set some environment variables:
+# Run `make help` to see commands.
+# 
+# You must have a .env file with:
 #
-# export ILCAMPAIGNCASH_DB_NAME=ilcampaigncash
-# export ILCAMPAIGNCASH_DB_URL=postgres://localhost/$ILCAMPAIGNCASH_DB_NAME
-# export ILCAMPAIGNCASH_FTP_USER=ftpuser
-# export ILCAMPAIGNCASH_FTP_PASSWD=ftppassword
+# 	ILCAMPAIGNCASH_FTP_USER=<your-ftp-user>
+# 	ILCAMPAIGNCASH_FTP_PASSWD=<your-ftp-password>
+# 	PGHOST=<your-pghost>
+# 	PGPORT=<your-pgport>
+# 	PGDATABASE=<your-database-name>
+# 	PGUSER=<your-db-user>
+# 	PGPASSWORD=<your-db-password>
 #
 ###############################################################################
 
@@ -18,11 +23,11 @@ export
 # Activate Python environment
 PIPENV = pipenv run
 
-# Base files
-TABLES = $(basename $(notdir $(wildcard sql/tables/*.sql)))
-
 # Schemas
 SCHEMAS = raw public
+
+# Source tables
+TABLES = $(basename $(notdir $(wildcard sql/tables/*.sql)))
 
 # Views
 VIEWS = $(basename $(notdir $(wildcard sql/views/*.sql)))
