@@ -27,4 +27,4 @@ AS
   FROM raw.expenditures
 ;
 
-
+ALTER TABLE public.expenditures ADD PRIMARY KEY (id);

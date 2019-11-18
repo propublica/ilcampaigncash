@@ -33,4 +33,4 @@ AS
   FROM raw.receipts
 ;
 
-
+ALTER TABLE public.receipts ADD PRIMARY KEY (id);

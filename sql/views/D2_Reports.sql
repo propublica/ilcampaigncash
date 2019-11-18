@@ -35,3 +35,5 @@ AS
   FROM raw.d2totals
 ;
 
+
+ALTER TABLE public.d2_reports ADD PRIMARY KEY (id);

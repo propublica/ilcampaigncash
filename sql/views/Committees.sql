@@ -30,3 +30,5 @@ AS
     purpose as purpose
   FROM raw.committees
 ;
+
+ALTER TABLE public.committees ADD PRIMARY KEY (id);

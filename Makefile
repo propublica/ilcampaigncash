@@ -31,8 +31,7 @@ VIEWS = $(basename $(notdir $(wildcard sql/views/*.sql)))
 ##@ Basic usage
 
 .PHONY: all
-all: ## Build database
-	@echo $(VIEWS)
+all: views db/vacuum ## Build database
 
 .PHONY: download
 download: $(patsubst %, data/download/%.txt, $(TABLES)) ## Download source data

@@ -67,3 +67,5 @@ UNION
           WHERE ((filed_docs.doc_name)::text <> 'Pre-election'::text)
           ORDER BY filed_docs.reporting_period_begin, filed_docs.reporting_period_end, filed_docs.committee_id, filed_docs.received_datetime DESC) f USING (filed_doc_id))
   ;
+
+ALTER TABLE public.condensed_receipts ADD PRIMARY KEY (id);

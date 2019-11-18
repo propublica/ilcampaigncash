@@ -33,3 +33,4 @@ AS
   FROM raw.fileddocs
 ;
 
+ALTER TABLE public.filed_docs ADD PRIMARY KEY (id);

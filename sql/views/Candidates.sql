@@ -18,3 +18,5 @@ AS
     redactionrequested as redaction_requested
   FROM raw.candidates
 ;
+
+ALTER TABLE public.candidates ADD PRIMARY KEY (id);
