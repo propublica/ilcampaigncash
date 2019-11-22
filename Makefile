@@ -7,7 +7,7 @@
 # You must have a .env file with:
 #
 # 	ILCAMPAIGNCASH_FTP_USER=<your-ftp-user>
-# 	ILCAMPAIGNCASH_FTP_PASSWD=<your-ftp-password>
+# 	ILCAMPAIGNCASH_FTP_PASSWORD=<your-ftp-password>
 # 	PGHOST=<your-pghost>
 # 	PGPORT=<your-pgport>
 # 	PGDATABASE=<your-database-name>
@@ -80,21 +80,9 @@ db/views/Most_Recent_Filings: sql/views/Most_Recent_Filings.sql db/views/Committ
 
 ##@ Database structure
 
-define create_extension
-	@(psql -c "\dx $(subst db/extensions/,,$@)" | grep $(subst db/extensions/,,$@) > /dev/null 2>&1 && \
-		echo "extension $(subst db/extensions/,,$@) exists") || \
-	psql -v ON_ERROR_STOP=1 -qX1ec "CREATE EXTENSION $(subst db/extensions/,,$@)"
-endef
-
 define create_raw_table
 	@(psql -c "\d raw.$(subst db/tables/,,$@)" > /dev/null 2>&1 && \
 		echo "table raw.$(subst db/tables/,,$@) exists") || \
-	psql -v ON_ERROR_STOP=1 -qX1ef $<
-endef
-
-define create_processed_table
-	@(psql -c "\d processed.$(subst db/processed/,,$@)" > /dev/null 2>&1 && \
-		echo "table processed.$(subst db/processed/,,$@) exists") || \
 	psql -v ON_ERROR_STOP=1 -qX1ef $<
 endef
 
@@ -110,24 +98,14 @@ define load_raw_csv
 	psql -v ON_ERROR_STOP=1 -qX1ec "\copy raw.$(subst db/csv/,,$@) from '$(CURDIR)/$<' with delimiter ',' csv header;"
 endef
 
-define create_function
-	@(psql -c "\df $(subst db/functions/,,$@)" | grep $(subst db/functions/,,$@) > /dev/null 2>&1 && \
-	 echo "function $(subst db/functions/,,$@) exists")	|| \
-	 psql -v ON_ERROR_STOP=1 -qX1ef sql/functions/$(subst db/functions/,,$@).sql
-endef
-
 .PHONY: db
 db: ## Create database
 	@(psql -c "SELECT 1" > /dev/null 2>&1 && \
 		echo "database $(PGDATABASE) exists") || \
 	createdb -e $(PGDATABASE) -E UTF8 -T template0 --locale=en_US.UTF-8
 
-.PHONY: db/extensions/%
-db/extensions/%: db ## Create extension % (where % is 'hstore', 'postgis', etc)
-	$(call create_extension)
-
 .PHONY: db/vacuum
-db/vacuum: # Vacuum db
+db/vacuum: ## Vacuum db
 	psql -v ON_ERROR_STOP=1 -qec "VACUUM ANALYZE;"
 
 .PHONY: db/schemas
@@ -137,28 +115,13 @@ db/schemas: $(patsubst %, db/schemas/%, $(SCHEMAS)) ## Make all schemas
 db/schemas/%: db # Create schema % (where % is 'raw', etc)
 	$(call create_schema)
 
-.PHONY: db/functions
-db/functions: $(patsubst %, db/functions/%, $(FUNCTIONS)) ## Make all functions
-
-.PHONY: db/functions/%
-db/functions/%: db
-	$(call create_function)
-
-.PHONY: db/searchpath
-db/searchpath: db/schemas # Set up (hardcoded) schema search path
-	psql -v ON_ERROR_STOP=1 -qX1c "ALTER DATABASE $(PGDATABASE) SET search_path TO public,views,processed,raw;"
-
 .PHONY: db/tables/%
-db/tables/%: sql/tables/%.sql db/searchpath # Create table % from sql/tables/%.sql
+db/tables/%: sql/tables/%.sql # Create table % from sql/tables/%.sql
 	$(call create_raw_table)
 
 .PHONY: db/csv/%
-db/csv/%: data/processed/%.csv db/tables/% # Load table % from data/downloads/%.csv
+db/csv/%: data/processed/%.csv db/tables/% ## Load table % from data/processed/%.csv
 	$(call load_raw_csv)
-
-.PHONY: db/processed/%
-db/processed/%: sql/processed/%.sql db/functions db/schemas # Make table cleaned and processed tables
-	$(call create_processed_table)
 
 .PHONY: dropschema/%
 dropschema/%: # @TODO wrap in detection
@@ -172,7 +135,7 @@ dropdb: ## Drop database
 ##@ Data processing
 
 data/download/%.txt: ## Download %.txt (where % is something like Candidates)
-	aria2c -x5 -q -d data/download --ftp-user="$(ILCAMPAIGNCASH_FTP_USER)" --ftp-passwd="$(ILCAMPAIGNCASH_FTP_PASSWD)" ftp://ftp.elections.il.gov/CampDisclDataFiles/$*.txt
+	aria2c -x5 -q -d data/download --ftp-user="$(ILCAMPAIGNCASH_FTP_USER)" --ftp-passwd="$(ILCAMPAIGNCASH_FTP_PASSWORD)" ftp://ftp.elections.il.gov/CampDisclDataFiles/$*.txt
 
 data/processed/%.csv: data/download/%.txt  ## Convert data/download/%.txt to data/processed/%.csv
 	$(PIPENV) python processors/clean_isboe_tsv.py $< $* > $@
