@@ -63,7 +63,7 @@ define create_view
 endef
 
 .PHONY: db/views/%
-db/views/%: sql/views/%.sql load  ## Create view % specified in sql/views/%.sql (will load all data)
+db/views/%: sql/views/%.sql load db/schemas/public ## Create view % specified in sql/views/%.sql (will load all data)
 	$(call create_view)
 
 .PHONY: db/views/Condensed_Receipts
@@ -116,7 +116,7 @@ db/schemas/%: db # Create schema % (where % is 'raw', etc)
 	$(call create_schema)
 
 .PHONY: db/tables/%
-db/tables/%: sql/tables/%.sql # Create table % from sql/tables/%.sql
+db/tables/%: sql/tables/%.sql db/schemas/raw # Create table % from sql/tables/%.sql
 	$(call create_raw_table)
 
 .PHONY: db/csv/%
