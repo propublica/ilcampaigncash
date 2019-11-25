@@ -34,3 +34,5 @@ AS
 ;
 
 ALTER TABLE public.receipts ADD PRIMARY KEY (id);
+
+ALTER TABLE public.receipts ADD CONSTRAINT receipt_committee FOREIGN KEY (committee_id) REFERENCES public.committees (id) NOT VALID;

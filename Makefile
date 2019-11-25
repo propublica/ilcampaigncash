@@ -59,23 +59,39 @@ help:  ## Display this help
 define create_view
 	(psql -c "\d public.$(subst db/views/,,$@)" > /dev/null 2>&1 && \
 		echo "view public.$(subst db/views/,,$@) exists") || \
-	psql -v ON_ERROR_STOP=1 -qX1ef $<
+	psql -v ON_ERROR_STOP=1 -qX1ef sql/views/$(subst db/views,,$@).sql
 endef
 
 .PHONY: db/views/%
 db/views/%: sql/views/%.sql load db/schemas/public ## Create view % specified in sql/views/%.sql (will load all data)
 	$(call create_view)
 
+.PHONY: db/views/Candidate_Elections
+db/views/Candidate_Elections: sql/views/Candidate_Elections.sql db/views/Candidates
+	$(call create_view)
+
+.PHONY: db/views/Committee_Candidate_Links
+db/views/Committee_Candidate_Links: db/views/Committees db/views/Candidates
+	$(call create_view)
+
+.PHONY: db/views/Receipts
+db/views/Receipts: db/views/Committees
+	$(call create_view)
+
+.PHONY: db/views/Expenditures
+db/views/Expenditures: db/views/Committees
+	$(call create_view)
+
 .PHONY: db/views/Condensed_Receipts
-db/views/Condensed_Receipts: sql/views/Condensed_Receipts.sql db/views/Receipts db/views/Most_Recent_Filings
+db/views/Condensed_Receipts: db/views/Receipts db/views/Most_Recent_Filings
 	$(call create_view)
 
 .PHONY: db/views/Condensed_Expenditures
-db/views/Condensed_Expenditures: sql/views/Condensed_Expenditures.sql db/views/Expenditures db/views/Most_Recent_Filings
+db/views/Condensed_Expenditures: db/views/Expenditures db/views/Most_Recent_Filings
 	$(call create_view)
 
 .PHONY: db/views/Most_Recent_Filings
-db/views/Most_Recent_Filings: sql/views/Most_Recent_Filings.sql db/views/Committees db/views/Filed_Docs db/views/D2_Reports
+db/views/Most_Recent_Filings: db/views/Committees db/views/Filed_Docs db/views/D2_Reports
 	$(call create_view)
 
 ##@ Database structure

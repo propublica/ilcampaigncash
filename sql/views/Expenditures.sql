@@ -28,3 +28,5 @@ AS
 ;
 
 ALTER TABLE public.expenditures ADD PRIMARY KEY (id);
+
+ALTER TABLE public.expenditures ADD CONSTRAINT expenditure_committee FOREIGN KEY (committee_id) REFERENCES public.committees (id) NOT VALID;

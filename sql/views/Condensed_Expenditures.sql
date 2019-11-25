@@ -57,3 +57,5 @@ UNION
   ;
 
 ALTER TABLE public.condensed_expenditures ADD PRIMARY KEY (id);
+
+ALTER TABLE public.condensed_expenditures ADD CONSTRAINT condensed_expenditure_committee FOREIGN KEY (committee_id) REFERENCES public.committees (id) NOT VALID;

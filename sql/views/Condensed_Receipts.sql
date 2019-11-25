@@ -69,3 +69,5 @@ UNION
   ;
 
 ALTER TABLE public.condensed_receipts ADD PRIMARY KEY (id);
+
+ALTER TABLE public.condensed_receipts ADD CONSTRAINT condensed_receipt_committee FOREIGN KEY (committee_id) REFERENCES public.committees (id) NOT VALID;
