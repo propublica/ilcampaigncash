@@ -74,6 +74,14 @@ db/views/Candidate_Elections: sql/views/Candidate_Elections.sql db/views/Candida
 db/views/Committee_Candidate_Links: db/views/Committees db/views/Candidates
 	$(call create_view)
 
+.PHONY: db/views/Committee_Officer_Links
+db/views/Committee_Officer_Links: db/views/Committees db/views/Officers
+	$(call create_view)
+
+.PHONY: db/views/Previous_Officers
+db/views/Previous_Officers: db/views/Committees
+	$(call create_view)
+
 .PHONY: db/views/Receipts
 db/views/Receipts: db/views/Committees
 	$(call create_view)
