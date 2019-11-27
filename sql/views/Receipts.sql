@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW receipts
+CREATE TABLE public.receipts
 AS
   SELECT
     id as id,
@@ -31,6 +31,8 @@ AS
     country as country,
     redactionrequested as redaction_requested
   FROM raw.receipts
-WITH DATA;
+;
 
+ALTER TABLE public.receipts ADD PRIMARY KEY (id);
 
+ALTER TABLE public.receipts ADD CONSTRAINT receipt_committee FOREIGN KEY (committee_id) REFERENCES public.committees (id) NOT VALID;

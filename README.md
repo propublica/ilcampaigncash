@@ -1,18 +1,26 @@
 # Illinois Campaign Cash loader
 
-Loads Illinois campaign fundraising data.
+Load Illinois campaign fundraising data from the Illinois State Board of Elections.
 
 ## Requirements
 
 * GNU Make
-* PostgreSQL
-* Python 3
-* [Aria2c](https://aria2.github.io/)
+* PostgreSQL (all versions > 9.x should work)
+* Python 3 (tested on 3.6 and 3.7)
+* [Aria2](https://aria2.github.io/)
 * FTP access to Illinois State Board Of Elections Data
 
 ## Install
 
 Some kind of Python environment tool (e.g. [pipenv](https://docs.pipenv.org/) or [virtualenv](https://virtualenv.pypa.io/en/stable/)) is highly recommended but not required.
+
+Pipenv is preferred. To use Pipenv, install with:
+
+```
+pipenv install
+```
+
+You can also install using the `requirements.txt` file:
 
 ```
 pip install -r requirements.txt
@@ -20,19 +28,32 @@ pip install -r requirements.txt
 
 ## Configure
 
-You'll need to export or set some environment variables:
+You'll need to create a `.env` file with configuration variables.
 
 ```
-export ILCAMPAIGNCASH_FTP_USER=<USERNAME>
-export ILCAMPAIGNCASH_FTP_PASSWD=<PASSWORD>
-export ILCAMPAIGNCASH_DB_NAME=ilcampaigncash
-export ILCAMPAIGNCASH_DB_ROOT_URL=postgres://localhost:5432/postgres
-export ILCAMPAIGNCASH_DB_URL=postgres://localhost:5432/ilcampaigncash
+ILCAMPAIGNCASH_FTP_USER=<your-ftp-username>
+ILCAMPAIGNCASH_FTP_PASSWORD=<your-ftp-password>
+
+PGHOST=<your-database-host>
+PGPORT=<your-database-port>
+PGDATABASE=<your-database-name>
+PGUSER=<your-database-username>
+PGPASSWORD=<your-database-password>
 ```
+
+The first two variables, `ILCAMPAIGNCASH_FTP_USER` and `IL_CAMPAIGNCASH_FTP_PASSWORD`, are required.
+
+The `PG*` variables are standard [libpq environment variables](https://www.postgresql.org/docs/current/libpq-envars.html) and will vary based on your configuration. But many users will be fine simply using the variables specified above.
 
 ## Loading the data
 
 Check out `Makefile` for all possible tasks.
+
+### See high-level tasks
+
+```
+make help
+```
 
 ### Load all
 
@@ -60,13 +81,30 @@ make download
 
 ## Advanced usage
 
-Because of Make's weird parallelization model, loading in parallel requires multiple steps.
+### Drop schemas individually to re-run processing steps
+
+Because transformed data and raw data exist in separate schemas, re-processing can be accomplished by dropping either or both schemas.
+
+For example, if you want to change how the raw data is processed into the final public tables, you can do this:
 
 ```
-make create_db sql_init create_tables create_views && make -j 4 load_data
+make dropschema/public
+make all
 ```
 
-This incantation creates the database and then loads each table in four parallel processes. Because the expenditure and receipts tables are orders of magnitude larger than any others, the performance increase isn't significant.
+### Paralellization
+
+Because of quirks with Make's parallelization model, you have to explicitly parallelize for steps that support it:
+
+This incantation should do the trick. It parallelizes downloading and data loading across 4 cores, while running database creation and view creation serially.
+
+```
+make -j4 download && make db db/schemas && make -j4 load && make views
+```
+
+## Notes
+
+"Views" are currently actually transformed copies of the tables from the `raw` schema, copied into the `public` schema. For performance reasons, these views are best expressed as materialized views. But because this database is intended to be accessed by Hasura, which doesn't yet support materialized views, we currently use straight copies. They are called views in this system in anticipation of materialized view support by Hasura and to convey their function, even if the underlying implementation isn't a "real" view.
 
 ## How it works
 
